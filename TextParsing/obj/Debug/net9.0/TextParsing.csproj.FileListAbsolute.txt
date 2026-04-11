@@ -17,3 +17,4 @@
 /Users/geshtalt/RiderProjects/TextParsing/TextParsing/obj/Debug/net9.0/TextParsing.pdb
 /Users/geshtalt/RiderProjects/TextParsing/TextParsing/obj/Debug/net9.0/TextParsing.genruntimeconfig.cache
 /Users/geshtalt/RiderProjects/TextParsing/TextParsing/obj/Debug/net9.0/ref/TextParsing.dll
+/Users/geshtalt/RiderProjects/TextParsing/TextParsing/obj/Debug/net9.0/TextParsing.sourcelink.json

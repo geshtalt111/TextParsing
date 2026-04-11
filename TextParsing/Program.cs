@@ -10,22 +10,25 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace DataManagerApp
 {
-    public class Person
+    //модель данных
+    public class User
     {
         public int id { get; set; }
-        public string firstName { get; set; }
-        public string lastName { get; set; }
+        public string name { get; set; }
+        public string role { get; set; }
+        public string registrationDate { get; set; }
+        public bool isActive { get; set; }
         
         public override string ToString()
         {
-            return id + ":  " + firstName + "  " + lastName;
+            return id + ": " + name + " | роль: " + role + " | дата регистрации: " + registrationDate + " | активен: " + (isActive ? "да" : "нет");
         }
     }
 
     class Program
     {
-        // список хранения
-        static List<Person> people = new List<Person>();
+        // список хранения пользователей
+        static List<User> users = new List<User>();
         
         // счетчик для новых id
         static int nextId = 1;
@@ -37,15 +40,15 @@ namespace DataManagerApp
             while (!exit)
             {
                 Console.Clear();
-                    Console.WriteLine("=== программа для работы с данными ===");
+                Console.WriteLine("работа с ланными");
                 Console.WriteLine("1. считать данные из файла");
                 Console.WriteLine("2. записать данные в файл");
                 Console.WriteLine("3. вывести данные на экран");
                 Console.WriteLine("4. сортировка");
-                Console.WriteLine("5. поиск по имени или фамилии");
-                Console.WriteLine("6. добавить нового человека");
-                Console.WriteLine("7. удалить человека по id");
-                Console.WriteLine("8. изменить данные человека");
+                Console.WriteLine("5. поиск по имени");
+                Console.WriteLine("6. добавить нового пользователя");
+                Console.WriteLine("7. удалить пользователя по id");
+                Console.WriteLine("8. изменить данные пользователя");
                 Console.WriteLine("9. выход");
                 Console.Write("выбери пункт: ");
                 
@@ -69,19 +72,19 @@ namespace DataManagerApp
                         searchData();
                         break;
                     case "6":
-                        addPerson();
+                        addUser();
                         break;
                     case "7":
-                        deletePerson();
+                        deleteUser();
                         break;
                     case "8":
-                        editPerson();
+                        editUser();
                         break;
                     case "9":
                         exit = true;
                         break;
                     default:
-                        Console.WriteLine("неверный выбор, нажми любую клавишу...");
+                        Console.WriteLine("неверный выбор");
                         Console.ReadKey();
                         break;
                 }
@@ -111,16 +114,16 @@ namespace DataManagerApp
                 switch (format)
                 {
                     case "csv":
-                        people = readCsv(filename);
+                        users = readCsv(filename);
                         break;
                     case "json":
-                        people = readJson(filename);
+                        users = readJson(filename);
                         break;
                     case "xml":
-                        people = readXml(filename);
+                        users = readXml(filename);
                         break;
                     case "yaml":
-                        people = readYaml(filename);
+                        users = readYaml(filename);
                         break;
                     default:
                         Console.WriteLine("неизвестный формат");
@@ -128,20 +131,15 @@ namespace DataManagerApp
                         return;
                 }
                 
-                
-                
-                
-                
-                if (people.Count > 0)
+                if (users.Count > 0)
                 {
-                    nextId = people.Max(p => p.id) + 1;
+                    nextId = users.Max(u => u.id) + 1;
                 }
                 
-                Console.WriteLine("загружено " + people.Count + " записей");
+                Console.WriteLine("загружено " + users.Count + " записей");
             }
             catch (Exception ex)
             {
-             
                 Console.WriteLine("ошибка при чтении: " + ex.Message);
                 File.AppendAllText("error.log", DateTime.Now + ": " + ex.Message + Environment.NewLine);
             }
@@ -153,7 +151,7 @@ namespace DataManagerApp
         
         static void writeDataToFile()
         {
-            if (people.Count == 0)
+            if (users.Count == 0)
             {
                 Console.WriteLine("нет данных для сохранения");
                 Console.ReadKey();
@@ -170,16 +168,16 @@ namespace DataManagerApp
                 switch (format)
                 {
                     case "csv":
-                        writeCsv(filename, people);
+                        writeCsv(filename, users);
                         break;
                     case "json":
-                        writeJson(filename, people);
+                        writeJson(filename, users);
                         break;
                     case "xml":
-                        writeXml(filename, people);
+                        writeXml(filename, users);
                         break;
                     case "yaml":
-                        writeYaml(filename, people);
+                        writeYaml(filename, users);
                         break;
                     default:
                         Console.WriteLine("неизвестный формат");
@@ -202,16 +200,16 @@ namespace DataManagerApp
         
         static void displayData()
         {
-            if (people.Count == 0)
+            if (users.Count == 0)
             {
                 Console.WriteLine("список пуст");
             }
             else
             {
-                Console.WriteLine("список людей:");
-                foreach (Person p in people)
+                Console.WriteLine("список пользователей:");
+                foreach (User u in users)
                 {
-                    Console.WriteLine(p);
+                    Console.WriteLine(u);
                 }
             }
             Console.ReadKey();
@@ -221,7 +219,7 @@ namespace DataManagerApp
         
         static void sortData()
         {
-            if (people.Count == 0)
+            if (users.Count == 0)
             {
                 Console.WriteLine("нет данных для сортировки");
                 Console.ReadKey();
@@ -231,7 +229,9 @@ namespace DataManagerApp
             Console.WriteLine("сортировать по:");
             Console.WriteLine("1 - id");
             Console.WriteLine("2 - имени");
-            Console.WriteLine("3 - фамилии");
+            Console.WriteLine("3 - роли");
+            Console.WriteLine("4 - дате регистрации");
+            Console.WriteLine("5 - активности");
             Console.Write("выбери: ");
             
             string choice = Console.ReadLine();
@@ -239,16 +239,24 @@ namespace DataManagerApp
             switch (choice)
             {
                 case "1":
-                    people = people.OrderBy(p => p.id).ToList();
+                    users = users.OrderBy(u => u.id).ToList();
                     Console.WriteLine("отсортировано по id");
                     break;
                 case "2":
-                    people = people.OrderBy(p => p.firstName).ToList();
+                    users = users.OrderBy(u => u.name).ToList();
                     Console.WriteLine("отсортировано по имени");
                     break;
                 case "3":
-                    people = people.OrderBy(p => p.lastName).ToList();
-                    Console.WriteLine("отсортировано по фамилии");
+                    users = users.OrderBy(u => u.role).ToList();
+                    Console.WriteLine("отсортировано по роли");
+                    break;
+                case "4":
+                    users = users.OrderBy(u => u.registrationDate).ToList();
+                    Console.WriteLine("отсортировано по дате регистрации");
+                    break;
+                case "5":
+                    users = users.OrderBy(u => u.isActive).ToList();
+                    Console.WriteLine("отсортировано по активности");
                     break;
                 default:
                     Console.WriteLine("неверный выбор");
@@ -262,20 +270,19 @@ namespace DataManagerApp
         
         static void searchData()
         {
-            if (people.Count == 0)
+            if (users.Count == 0)
             {
                 Console.WriteLine("нет данных для поиска");
                 Console.ReadKey();
                 return;
             }
             
-            Console.Write("введи текст для поиска (ищет по имени и фамилии): ");
+            Console.Write("введи текст для поиска (ищет по имени): ");
             string searchText = Console.ReadLine().ToLower();
             
-            // ищем людей у которых имя или фамилия содержат искомый текст
-            List<Person> results = people.Where(p => 
-                p.firstName.ToLower().Contains(searchText) || 
-                p.lastName.ToLower().Contains(searchText)
+            // ищем пользователей у которых имя содержит искомый текст
+            List<User> results = users.Where(u => 
+                u.name.ToLower().Contains(searchText)
             ).ToList();
             
             if (results.Count == 0)
@@ -285,51 +292,58 @@ namespace DataManagerApp
             else
             {
                 Console.WriteLine("найдено " + results.Count + " записей:");
-                foreach (Person p in results)
+                foreach (User u in results)
                 {
-                    Console.WriteLine(p);
+                    Console.WriteLine(u);
                 }
             }
             
             Console.ReadKey();
         }
         
-        //добавление
+        //добавление пользователя
         
-        static void addPerson()
+        static void addUser()
         {
             Console.Write("введи имя: ");
-            string firstName = Console.ReadLine();
-            Console.Write("введи фамилию: ");
-            string lastName = Console.ReadLine();
+            string name = Console.ReadLine();
+            Console.Write("введи роль (admin/user/manager): ");
+            string role = Console.ReadLine();
+            Console.Write("введи дату регистрации (гггг-мм-дд): ");
+            string registrationDate = Console.ReadLine();
+            Console.Write("пользователь активен? (да/нет): ");
+            string activeInput = Console.ReadLine();
+            bool isActive = activeInput.ToLower() == "да" || activeInput.ToLower() == "yes" || activeInput.ToLower() == "true";
             
-            //создание
-            Person newPerson = new Person
+            //создание нового пользователя
+            User newUser = new User
             {
                 id = nextId,
-                firstName = firstName,
-                lastName = lastName
+                name = name,
+                role = role,
+                registrationDate = registrationDate,
+                isActive = isActive
             };
             
-            people.Add(newPerson);
+            users.Add(newUser);
             nextId++;
             
-            Console.WriteLine("человек добавлен, id = " + newPerson.id);
+            Console.WriteLine("пользователь добавлен, id = " + newUser.id);
             Console.ReadKey();
         }
         
         //delete
         
-        static void deletePerson()
+        static void deleteUser()
         {
-            if (people.Count == 0)
+            if (users.Count == 0)
             {
                 Console.WriteLine("нет данных для удаления");
                 Console.ReadKey();
                 return;
             }
             
-            Console.Write("введи id человека для удаления: ");
+            Console.Write("введи id пользователя для удаления: ");
             if (!int.TryParse(Console.ReadLine(), out int id))
             {
                 Console.WriteLine("неверный id");
@@ -337,41 +351,34 @@ namespace DataManagerApp
                 return;
             }
             
+            //поиск пользователя по id 
+            User userToDelete = users.FirstOrDefault(u => u.id == id);
             
-            
-            
-            
-            
-            
-            
-            //поиск человека по id 
-            Person personToDelete = people.FirstOrDefault(p => p.id == id);
-            
-            if (personToDelete == null)
+            if (userToDelete == null)
             {
-                Console.WriteLine("человек с id " + id + " не найден");
+                Console.WriteLine("пользователь с id " + id + " не найден");
             }
             else
             {
-                people.Remove(personToDelete);
-                Console.WriteLine("человек удален");
+                users.Remove(userToDelete);
+                Console.WriteLine("пользователь удален");
             }
             
             Console.ReadKey();
         }
         
-        //изменение данных
+        //изменение данных пользователя
         
-        static void editPerson()
+        static void editUser()
         {
-            if (people.Count == 0)
+            if (users.Count == 0)
             {
                 Console.WriteLine("нет данных для изменения");
                 Console.ReadKey();
                 return;
             }
             
-            Console.Write("введи id человека для изменения: ");
+            Console.Write("введи id пользователя для изменения: ");
             if (!int.TryParse(Console.ReadLine(), out int id))
             {
                 Console.WriteLine("неверный id");
@@ -379,27 +386,41 @@ namespace DataManagerApp
                 return;
             }
             
-            // ищем человека po id
-            Person personToEdit = people.FirstOrDefault(p => p.id == id);
+            // ищем пользователя по id
+            User userToEdit = users.FirstOrDefault(u => u.id == id);
             
-            if (personToEdit == null)
+            if (userToEdit == null)
             {
-                Console.WriteLine("человек с id " + id + " не найден");
+                Console.WriteLine("пользователь с id " + id + " не найден");
             }
             else
             {
-                Console.Write("новое имя (старое: " + personToEdit.firstName + "): ");
-                string newFirstName = Console.ReadLine();
-                if (!string.IsNullOrWhiteSpace(newFirstName))
+                Console.Write("новое имя (старое: " + userToEdit.name + "): ");
+                string newName = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(newName))
                 {
-                    personToEdit.firstName = newFirstName;
+                    userToEdit.name = newName;
                 }
                 
-                Console.Write("новая фамилия (старая: " + personToEdit.lastName + "): ");
-                string newLastName = Console.ReadLine();
-                if (!string.IsNullOrWhiteSpace(newLastName))
+                Console.Write("новая роль (старая: " + userToEdit.role + "): ");
+                string newRole = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(newRole))
                 {
-                    personToEdit.lastName = newLastName;
+                    userToEdit.role = newRole;
+                }
+                
+                Console.Write("новая дата регистрации (старая: " + userToEdit.registrationDate + "): ");
+                string newDate = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(newDate))
+                {
+                    userToEdit.registrationDate = newDate;
+                }
+                
+                Console.Write("пользователь активен? (да/нет) (старое: " + (userToEdit.isActive ? "да" : "нет") + "): ");
+                string newActive = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(newActive))
+                {
+                    userToEdit.isActive = newActive.ToLower() == "да" || newActive.ToLower() == "yes" || newActive.ToLower() == "true";
                 }
                 
                 Console.WriteLine("данные изменены");
@@ -410,49 +431,49 @@ namespace DataManagerApp
         
         //csv read
         
-        static List<Person> readCsv(string filename)
+        static List<User> readCsv(string filename)
         {
             using (StreamReader reader = new StreamReader(filename))
             using (CsvReader csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
-                return csv.GetRecords<Person>().ToList();
+                return csv.GetRecords<User>().ToList();
             }
         }
         
         //json read
         
-        static List<Person> readJson(string filename)
+        static List<User> readJson(string filename)
         {
             string json = File.ReadAllText(filename);
-            return JsonConvert.DeserializeObject<List<Person>>(json);
+            return JsonConvert.DeserializeObject<List<User>>(json);
         }
         
         //xml read
         
-        static List<Person> readXml(string filename)
+        static List<User> readXml(string filename)
         {
             System.Xml.Serialization.XmlSerializer serializer = 
-                new System.Xml.Serialization.XmlSerializer(typeof(List<Person>));
+                new System.Xml.Serialization.XmlSerializer(typeof(List<User>));
             using (StreamReader reader = new StreamReader(filename))
             {
-                return (List<Person>)serializer.Deserialize(reader);
+                return (List<User>)serializer.Deserialize(reader);
             }
         }
         
         //yaml read
         
-        static List<Person> readYaml(string filename)
+        static List<User> readYaml(string filename)
         {
             string yaml = File.ReadAllText(filename);
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
-            return deserializer.Deserialize<List<Person>>(yaml);
+            return deserializer.Deserialize<List<User>>(yaml);
         }
         
-        //csv
+        //csv write
         
-        static void writeCsv(string filename, List<Person> data)
+        static void writeCsv(string filename, List<User> data)
         {
             using (StreamWriter writer = new StreamWriter(filename))
             using (CsvWriter csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
@@ -461,29 +482,29 @@ namespace DataManagerApp
             }
         }
         
-        //json
+        //json write
         
-        static void writeJson(string filename, List<Person> data)
+        static void writeJson(string filename, List<User> data)
         {
             string json = JsonConvert.SerializeObject(data, Formatting.Indented);
             File.WriteAllText(filename, json);
         }
         
-        //xml
+        //xml write
         
-        static void writeXml(string filename, List<Person> data)
+        static void writeXml(string filename, List<User> data)
         {
             System.Xml.Serialization.XmlSerializer serializer = 
-                new System.Xml.Serialization.XmlSerializer(typeof(List<Person>));
+                new System.Xml.Serialization.XmlSerializer(typeof(List<User>));
             using (StreamWriter writer = new StreamWriter(filename))
             {
                 serializer.Serialize(writer, data);
             }
         }
         
-        //yaml
+        //yaml write
         
-        static void writeYaml(string filename, List<Person> data)
+        static void writeYaml(string filename, List<User> data)
         {
             var serializer = new SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)

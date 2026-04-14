@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "name": "july",
+    "role": "admin",
+    "registrationDate": "2007-03-02",
+    "isActive": true
+  }
+]

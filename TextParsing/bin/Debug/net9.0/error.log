@@ -1,0 +1,22 @@
+14.04.2026 12:33:39: Header with name 'name'[0] was not found.
+Header with name 'role'[0] was not found.
+Header with name 'registrationDate'[0] was not found.
+Header with name 'isActive'[0] was not found.
+Headers: 'id', 'firstName', 'lastName'
+If you are expecting some headers to be missing and want to ignore this validation, set the configuration HeaderValidated to null. You can also change the functionality to do something else, like logging the issue.
+
+IReader state:
+   ColumnCount: 3
+   CurrentIndex: -1
+   HeaderRecord:
+["id","firstName","lastName"]
+IParser state:
+   ByteCount: 0
+   CharCount: 23
+   Row: 1
+   RawRow: 1
+   Count: 3
+   RawRecord:
+id,firstName,lastName
+
+
